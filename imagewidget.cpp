@@ -1,30 +1,28 @@
-// imagewidget.cpp
+﻿// imagewidget.cpp
 #include "imagewidget.h"
 #include <QDir>
 #include <QStringList>
 #include <QListWidget>
 #include <QVBoxLayout>
 #include <QListWidgetItem>
+#include <QPushButton>
 
 ImageWidget::ImageWidget(QWidget *parent)
     : QWidget(parent){
     this->init(parent);
+    m_showWidget = new QLabel(parent);
 }
 
 ImageWidget::~ImageWidget(){}
 
 void ImageWidget::init(QWidget *parent) {
-    // 窗口基本设置
-    this->setWindowTitle("Image Preview");
-    this->setMinimumSize(240, 320);
-    m_showWidget.setWindowTitle("Image Show");
-    m_showWidget.setAlignment(Qt::AlignCenter);
+    const QSize IMAGE_SIZE(73, 73);
+    const QSize ITEM_SIZE(73, 73);
 
-    const QSize IMAGE_SIZE(70, 70);
-    const QSize ITEM_SIZE(72, 72);
+    this->setGeometry(0, 0, 240, 320);
 
     // 判断路径是否存在
-    m_strPath = "J:\\img";
+    m_strPath = "/Users/jack/Pictures";
     QDir dir(m_strPath);
     if (!dir.exists()) {
         return;
@@ -50,24 +48,31 @@ void ImageWidget::init(QWidget *parent) {
 
     // 创建单元项
     for (int i = 0; i<m_imgList.count(); ++i) {
-        QPixmap pixmap(m_strPath + "\\" + m_imgList.at(i));
-        QListWidgetItem *listWidgetItem = new QListWidgetItem(QIcon(pixmap.scaled(IMAGE_SIZE)), m_imgList.at(i));
+        QPixmap pixmap(m_strPath + "/" + m_imgList.at(i));
+        QListWidgetItem *listWidgetItem = new QListWidgetItem(QIcon(pixmap.scaled(IMAGE_SIZE)), NULL);  //delete name display
         listWidgetItem->setSizeHint(ITEM_SIZE);
         m_listWidget->insertItem(i, listWidgetItem);
     }
-
-    // 窗口布局
-    QHBoxLayout *mainLayout = new QHBoxLayout;
-    mainLayout->addWidget(m_listWidget);
-    mainLayout->setMargin(0);
-    this->setLayout(mainLayout);
 
     // 信号与槽
     connect(m_listWidget, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(slot_itemClicked(QListWidgetItem*)));
 }
 
-// 最大化窗口显示图像
-void ImageWidget::slot_itemClicked(QListWidgetItem * item) {
-    m_showWidget.setPixmap(QPixmap(m_strPath + "\\" + m_imgList.at(m_listWidget->row(item))));
-    m_showWidget.showMaximized();
+// 全屏等比例显示图像
+void ImageWidget::slot_itemClicked(QListWidgetItem * item){
+    QSize picSize(240,320); //设定屏幕比例参数
+    m_showWidget->setAutoFillBackground(1);
+    m_showWidget->setGeometry(0, 0, 240, 320);
+    m_showWidget->setPixmap(QPixmap(m_strPath + "/" + m_imgList.at(m_listWidget->row(item))).scaled(picSize, Qt::KeepAspectRatio));
+
+    //return button
+    QPushButton backButton;
+    backButton.setGeometry(10, 300, 20, 10);
+    backButton.setBackgroundRole(QPalette::Dark);
+
+    this->show();
+    //propreties button
+
+    //slot of return button
+    //connect();
 }
