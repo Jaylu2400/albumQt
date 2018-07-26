@@ -4,6 +4,7 @@
 
 #include <QtWidgets/QWidget>
 #include <QLabel>
+#include <QPushButton>
 
 class QStringList;
 class QListWidget;
@@ -18,16 +19,22 @@ public:
     ~ImageWidget();
 
 private:
-    void init(QWidget *parent);    // 初始化
+    void init();    // 初始化
+    void initObject();
 
 private slots:
     void slot_itemClicked(QListWidgetItem*);
+    void menuView(void);
+    void back2Album(void);
 
 private:
     QStringList m_imgList;                  // 文件目录下所有的图像文件名
     QListWidget *m_listWidget;              // 预览窗口
     QString m_strPath;                      // 文件夹路径
+
     QLabel *m_showWidget;                    // 图像显示窗口
+    QPushButton *menuButton;
+    QPushButton *backButton;
 };
 
 #endif // IMAGEWIDGET_H

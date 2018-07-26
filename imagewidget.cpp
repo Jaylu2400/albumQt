@@ -6,16 +6,31 @@
 #include <QVBoxLayout>
 #include <QListWidgetItem>
 #include <QPushButton>
+#include <stdbool.h>
+#include <qDebug>
 
 ImageWidget::ImageWidget(QWidget *parent)
     : QWidget(parent){
-    this->init(parent);
-    m_showWidget = new QLabel(parent);
+
+    this->init();
+    m_showWidget = new QLabel(this);
+    menuButton = new QPushButton(this);
+    backButton   = new QPushButton(this);
+}
+
+void ImageWidget::initObject(){
+    qDebug() << "initObject()";
+
+    m_showWidget = new QLabel(this);
+    menuButton = new QPushButton(this);
+    backButton   = new QPushButton(this);
 }
 
 ImageWidget::~ImageWidget(){}
 
-void ImageWidget::init(QWidget *parent) {
+void ImageWidget::init() {
+
+    qDebug() << "init()";
     const QSize IMAGE_SIZE(73, 73);
     const QSize ITEM_SIZE(73, 73);
 
@@ -38,7 +53,7 @@ void ImageWidget::init(QWidget *parent) {
     }
 
     // QListWidget基本设置
-    m_listWidget = new QListWidget(parent);
+    m_listWidget = new QListWidget(this);
     m_listWidget->setGeometry(0, 0, 240, 320);
     m_listWidget->setIconSize(IMAGE_SIZE);
     m_listWidget->setResizeMode(QListView::Adjust);
@@ -54,25 +69,61 @@ void ImageWidget::init(QWidget *parent) {
         m_listWidget->insertItem(i, listWidgetItem);
     }
 
+    //initObject();
+
     // 信号与槽
     connect(m_listWidget, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(slot_itemClicked(QListWidgetItem*)));
 }
 
 // 全屏等比例显示图像
 void ImageWidget::slot_itemClicked(QListWidgetItem * item){
+    qDebug() << "slot_itemClicked";
+
     QSize picSize(240,320); //设定屏幕比例参数
-    m_showWidget->setAutoFillBackground(1);
-    m_showWidget->setGeometry(0, 0, 240, 320);
+
+    m_showWidget->setAutoFillBackground(true);
+    m_showWidget->setGeometry(0, 0, 240, 300);
     m_showWidget->setPixmap(QPixmap(m_strPath + "/" + m_imgList.at(m_listWidget->row(item))).scaled(picSize, Qt::KeepAspectRatio));
 
-    //return button
-    QPushButton backButton;
-    backButton.setGeometry(10, 300, 20, 10);
-    backButton.setBackgroundRole(QPalette::Dark);
+    //menu button
+    menuButton->setText("菜单");
+    menuButton->setGeometry(210, 300, 30, 20);
+    connect(menuButton, SIGNAL(clicked()), this, SLOT(menuView()));
 
+    //back button
+    backButton->setText("返回");
+    backButton->setGeometry(0, 300, 30, 20);
+
+    //slot and singnal
+    connect(backButton, SIGNAL(clicked()), this, SLOT(back2Album()));
+
+    m_showWidget->show();
+}
+
+void ImageWidget::menuView(void){
+    qDebug() << "menuView";
+    QLabel *menuLabel = new QLabel;
+    menuLabel->setGeometry(100, 150, 40, 20);
+
+}
+
+void ImageWidget::back2Album(void){
+    qDebug() << "back2Album";
+//    delete m_showWidget;
+//    delete menuButton;
+//    delete backButton;
+
+//    m_showWidget    =   NULL;
+//    menuButton      =   NULL;
+//    backButton      =   NULL;
+
+//    if(NULL != m_showWidget)
+//        qDebug() << "delete m_showWidget fail!!!";
+//    if(NULL != menuButton)
+//        qDebug() << "delete menuButton fail!";
+//    if(NULL != backButton)
+//        qDebug() << "delete backButton fail!";
+    disconnect(backButton, SIGNAL(clicked()), this, SLOT(back2Album()));
+    m_showWidget->hide();
     this->show();
-    //propreties button
-
-    //slot of return button
-    //connect();
 }
