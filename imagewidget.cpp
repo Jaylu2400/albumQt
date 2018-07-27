@@ -135,10 +135,10 @@ void ImageWidget::moveCurrentPage(bool direction)
 //    int current_pos_x = total_label->x();    //label position
 //    int dest_pos_x = -680 * current_index;
 
-    if(direction){  //right
-
-    }else{          //left
-
+    if(direction){
+        //show right pic
+    }else{
+        //show left pic
     }
 
 //    total_label->move(dest_pos_x, 0);
@@ -250,10 +250,16 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item){
 
     //如果点击第一张图片，自动加载下一张，禁止右滑|如果点击最后一张，自动加载上一张，禁止左滑
     for(int i = l; i <= r; i++){
-        painter.drawPixmap(0 + (i - xIndex) * 240, 0, 240, 320, QPixmap(m_strPath + "//" + m_imgList.at(i)).scaled(picSize, Qt::KeepAspectRatio));
-    }
+        int h = QPixmap(m_strPath + "//" + m_imgList.at(i)).scaled(picSize, Qt::KeepAspectRatio).height();
+        int w = QPixmap(m_strPath + "//" + m_imgList.at(i)).scaled(picSize, Qt::KeepAspectRatio).width();
 
+        qDebug() << "w = " << w << " h = " << h;
+        painter.drawPixmap((i - xIndex) * 240, (320 - h) / 2, QPixmap(m_strPath + "//" + m_imgList.at(i)).scaled(picSize, Qt::KeepAspectRatio));
+    }
+    //pixmap.
+    //painter.drawPixmap();
     m_showWidget->resize(pixmap.size());
+    //m_showWidget->setAlignment(Qt::AlignVCenter);
     m_showWidget->setPixmap(pixmap);
     m_showWidget->move((l - r + 1) * 240, 0);        //居中显示
 #endif
