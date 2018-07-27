@@ -3,6 +3,9 @@
 
 #include <QMainWindow>
 
+#define Win32
+//#define OSX
+
 namespace Ui {
 class MainWindow;
 }
