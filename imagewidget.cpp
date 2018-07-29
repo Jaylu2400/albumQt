@@ -101,7 +101,10 @@ void ImageWidget::mouseMoveEvent(QMouseEvent *event)
         curPosX = 0;
     }
 
-    m_showWidget->move(xPos - (curIndex * 240), 0);
+    if(curIndex == 0)
+        m_showWidget->move(xPos, 0);
+    else
+        m_showWidget->move(xPos - 240, 0);
 }
 
 void ImageWidget::setLabelMove(bool enable)
