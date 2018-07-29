@@ -30,17 +30,18 @@ private:
     QPoint m_mouseSrcPos;   //滑动的初始点
     QPoint m_mouseDstPos;   //滑动的终点
     QLabel *total_label;    //图片滑动的动态页面/放大后的移动页面（大小变化）
-    bool mouse_press;
-    bool mouse_move;
+    bool mousePress;
+    bool mouseMove;
     bool label_move;
     bool firstPress;
-    int current_index;
-    int current_pos_x;
+    int curIndex;
+    int curPosX;
 
     void moveCurrentPage(bool direction);
     void setLabelMove(bool enable);
     void zoomOut(void);     //缩小图片
     void zoomIn(void);      //放大图片
+    void updateLoadImg(int index);
 
 private slots:
     void slot_itemClicked(QListWidgetItem*);

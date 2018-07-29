@@ -1,10 +1,10 @@
-#ifndef MAINWINDOW_H
+﻿#ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
 #include <QMainWindow>
 
-#define Win32
-//#define OSX
+//#define Win32
+#define OSX
 
 namespace Ui {
 class MainWindow;
