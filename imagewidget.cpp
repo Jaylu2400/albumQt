@@ -85,11 +85,12 @@ void ImageWidget::mouseReleaseEvent(QMouseEvent *event)
 
 void ImageWidget::mouseMoveEvent(QMouseEvent *event)
 {
-    qDebug() << "mouse Move Event";
+    //qDebug() << "mouse Move Event";
     mouseMove = true;
     m_mouseDstPos = event->pos();
 
     int xPos = m_mouseDstPos.x() - m_mouseSrcPos.x();
+    qDebug() << "xPos = " + xPos;
 
     if((curIndex == 0) && (xPos > 0)){
         xPos = 0;
@@ -100,18 +101,7 @@ void ImageWidget::mouseMoveEvent(QMouseEvent *event)
         curPosX = 0;
     }
 
-    m_showWidget->move(xPos, 0);
-}
-
-//根据滑动距离自动居中图片
-//fase: left    true:right
-void ImageWidget::moveCurrentPage(bool direction)
-{
-    if(direction){
-        //show right pic
-    }else{
-        //show left pic
-    }
+    m_showWidget->move(xPos - (curIndex * 240), 0);
 }
 
 void ImageWidget::setLabelMove(bool enable)
@@ -181,24 +171,21 @@ void ImageWidget::init() {
     connect(m_listWidget, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(slot_itemClicked(QListWidgetItem*)));
 }
 
-void ImageWidget::updateLoadImg(int itemIndex){
+void ImageWidget::updateLoadImg(int index){
     int l = 0, r = 0;     //控制图片加载边界
     int xIndex;           //控制绘图的横坐标索引
-    //int itemIndex = 0;    //图片编号
-    //itemIndex = m_listWidget->row(item);
-    curIndex = itemIndex;
-    l = itemIndex;
-    r = itemIndex;
+    l = index;
+    r = index;
 
     if((l < 0) || (r > (m_listWidget->count() - 1)))
         return;
 
     if(l > 0){                           //加载第一张以后的图片时，自动加载上一张
-        xIndex = itemIndex - 1;
+        xIndex = index - 1;
         l -= 1;
     }
     else
-        xIndex = itemIndex;
+        xIndex = index;
 
     if(r < (m_listWidget->count() - 1)) //加载最后一张之前的图片时，自动加载上一张
         r += 1;
@@ -244,7 +231,8 @@ void ImageWidget::updateLoadImg(int itemIndex){
 void ImageWidget::slot_itemClicked(QListWidgetItem * item){
     qDebug() << "slot_itemClicked, item index= " << m_listWidget->row(item) << "count = " << m_listWidget->count();
 
-    updateLoadImg(m_listWidget->row(item));
+    curIndex = m_listWidget->row(item);
+    updateLoadImg(curIndex);
 
     //menu button
     menuButton->setText("菜单");

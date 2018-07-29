@@ -37,7 +37,6 @@ private:
     int curIndex;
     int curPosX;
 
-    void moveCurrentPage(bool direction);
     void setLabelMove(bool enable);
     void zoomOut(void);     //缩小图片
     void zoomIn(void);      //放大图片
