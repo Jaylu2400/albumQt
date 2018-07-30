@@ -10,7 +10,7 @@
 class QStringList;
 class QListWidget;
 class QListWidgetItem;
-
+class QImage;
 class ImageWidget : public QWidget
 {
     Q_OBJECT
@@ -55,6 +55,8 @@ private:
     QLabel *m_showWidget;                    // 图像显示窗口
     QPushButton *menuButton;
     QPushButton *backButton;
+
+    QPixmap cenPixmap;
 };
 
 #endif // IMAGEWIDGET_H

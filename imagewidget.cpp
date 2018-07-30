@@ -198,15 +198,26 @@ void ImageWidget::updateLoadImg(int index){
 #ifdef OSX
     QPixmap pixmap(QSize(this->width() * (r - l + 1), this->height()));
     QPainter painter(&pixmap);
+    QImage image;
 
     qDebug() << "l = " << l << " r = " << r << " xIndex = " << xIndex;
 
     //如果点击第一张图片，自动加载下一张，禁止右滑|如果点击最后一张，自动加载上一张，禁止左滑
     for(int i = l; i <= r; i++){
-        painter.drawPixmap((i - xIndex) * 240, 0, QPixmap(m_strPath + "/" + m_imgList.at(i)).scaled(picSize, Qt::KeepAspectRatio));
+        //painter.drawPixmap((i - xIndex) * 240, 0, QPixmap(m_strPath + "/" + m_imgList.at(i)).scaled(picSize, Qt::KeepAspectRatio));
+
+        QImage image(m_strPath + "//" + m_imgList.at(i));
+        QPixmap pixmap = QPixmap::fromImage(image).scaled(picSize, Qt::KeepAspectRatio);
+
+        int h = pixmap.height();
+        int w = pixmap.width();
+
+        painter.drawPixmap((i - xIndex) * 240 + (240 - w) / 2, (320 - h) / 2, pixmap);
     }
-    m_showWidget->resize(pixmap.size());
-    m_showWidget->setPixmap(pixmap);
+    cenPixmap = pixmap;
+
+    m_showWidget->resize(cenPixmap.size());
+    m_showWidget->setPixmap(cenPixmap);
     m_showWidget->move((l - r + 1) * 240, 0);
 #endif
 #ifdef Win32
@@ -257,6 +268,10 @@ void ImageWidget::menuView(void){
     QLabel *menuLabel = new QLabel;
     menuLabel->setGeometry(100, 150, 40, 20);
 
+    //zoom test
+    int w = cenPixmap.width();
+    m_showWidget->setPixmap(cenPixmap.scaledToWidth(w * 1.2));
+    m_showWidget->show();
 }
 
 void ImageWidget::back2Album(void){
