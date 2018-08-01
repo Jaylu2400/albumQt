@@ -11,6 +11,7 @@ class QStringList;
 class QListWidget;
 class QListWidgetItem;
 class QImage;
+class QGestureEvent;
 class ImageWidget : public QWidget
 {
     Q_OBJECT
@@ -23,7 +24,8 @@ protected:
     void mousePressEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
-
+    void mouseDoubleClickEvent(QMouseEvent *event);
+    void gestureEvent(QGestureEvent *event);
 private:
     void init();
     void initObject();
@@ -36,11 +38,15 @@ private:
     bool firstPress;
     int curIndex;
     int curPosX;
+    bool isSingleItemUI;    //是否图片查看界面 default:false
+    bool isFirstDouble;     //是否第一次双击   default:true
+    bool isZoomMode;        //是否缩放模式    default:false
 
     void setLabelMove(bool enable);
     void zoomOut(void);     //缩小图片
     void zoomIn(void);      //放大图片
     void updateLoadImg(int index);
+    double getScaleValue(QSize img, QSize view);
 
 private slots:
     void slot_itemClicked(QListWidgetItem*);
@@ -57,6 +63,8 @@ private:
     QPushButton *backButton;
 
     QPixmap cenPixmap;
+    QPixmap showPixmap;
+    QImage  cenImg;
 };
 
 #endif // IMAGEWIDGET_H
