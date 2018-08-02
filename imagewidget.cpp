@@ -135,19 +135,20 @@ void ImageWidget::mouseMoveEvent(QMouseEvent *event)
 void ImageWidget::mouseDoubleClickEvent(QMouseEvent *event)
 {
     QSize screenSize(240, 320);
-
+    QSize cenPicSize(cenPixW, cenPixH);
     //qDebug() << "mouseDoubleClickEvent";
     isZoomMode = true;
     if(isSingleItemUI){                 //判断当前是否查看图像界面 查看图像界面/缩略图界面
         if(isFirstDouble){              //第一次双击，放大到填充屏幕
             qDebug() << "first double click!!";
             isFirstDouble = false;
-            double scale = getScaleValue(cenPixmap.size(), screenSize);
+            double scale = getScaleValue(cenPicSize, screenSize);
 
             double w = cenPixW * scale;
             double h = cenPixH * scale;
 
-            m_showWidget->setPixmap(cenPixmap.scaled(w, h, Qt::KeepAspectRatio));
+            m_showWidget->close();
+            m_showWidget->setPixmap(cenPixmap.scaled(w, h, Qt::KeepAspectRatio));   //按比例缩放到(w, h)大小
             m_showWidget->resize(w, h);
             m_showWidget->show();
         }else{   //第二次双击，返回slot_itemClicked
@@ -271,13 +272,14 @@ void ImageWidget::updateLoadImg(int index){
 
         int h = pixmap.height();
         int w = pixmap.width();
-        cenPixW = w;
-        cenPixH = h;
 
         painter.drawPixmap((i - xIndex) * 240 + (240 - w) / 2, (320 - h) / 2, pixmap);
 
-        if(index == i)
-            cenPixmap = cenPixmap.fromImage(image); //KeepAspectRatio  KeepAspectRatioByExpanding , Qt::SmoothTransformation       }
+        if(index == i){
+            cenPixW = w;
+            cenPixH = h;
+            cenPixmap = cenPixmap.fromImage(image); //KeepAspectRatio  KeepAspectRatioByExpanding , Qt::SmoothTransformation
+        }
     }
     showPixmap = pixmap;
 
