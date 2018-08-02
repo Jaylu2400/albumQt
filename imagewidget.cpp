@@ -31,6 +31,9 @@ ImageWidget::ImageWidget(QWidget *parent)
     , isZoomMode(false)
     , cenPixW(0)
     , cenPixH(0)
+    , zoomScale(0.0)
+    , xPosLast(0)
+    , yPosLast(0)
 {
     this->init();
 
@@ -67,31 +70,36 @@ void ImageWidget::mousePressEvent(QMouseEvent *event)
 void ImageWidget::mouseReleaseEvent(QMouseEvent *event)
 {
     //qDebug() << "mouse Relase Event";
-    if (mouseMove) {
+    m_mouseDstPos = event->pos();
+    int xPos = m_mouseDstPos.x() - m_mouseSrcPos.x();
+    int yPos = m_mouseDstPos.y() - m_mouseSrcPos.y();
 
-            m_mouseDstPos = event->pos();
-            int xPos = m_mouseDstPos.x() - m_mouseSrcPos.x();
+    if(!isZoomMode){
+        if (mouseMove) {
 
-            if((curIndex == 0) && (xPos > 0)){
-                return;
-            }else
-            if((curIndex == m_listWidget->count() - 1) && (xPos < 0)){
-                return;
-            }
 
-            if (xPos > 100) {                     //move right
-                 curIndex --;
-                 curPosX = -240;
-            }else
-            if(xPos < -100){
-                 curIndex ++;
-                 curPosX = 240;
-            }
+                if((curIndex == 0) && (xPos > 0)){
+                    return;
+                }else
+                if((curIndex == m_listWidget->count() - 1) && (xPos < 0)){
+                    return;
+                }
 
-            m_showWidget->move(curPosX, 0);
-            updateLoadImg(curIndex);
-     }
+                if (xPos > 100) {                     //move right
+                     curIndex --;
+                     curPosX = -240;
+                }else
+                if(xPos < -100){
+                     curIndex ++;
+                     curPosX = 240;
+                }
 
+                m_showWidget->move(curPosX, 0);
+                updateLoadImg(curIndex);
+         }
+    }else{
+        //m_showWidget->setGeometry(xPos, yPos, cenPixW * zoomScale - xPos, cenPixH * zoomScale - yPos);
+    }
 }
 
 void ImageWidget::mouseMoveEvent(QMouseEvent *event)
@@ -121,6 +129,20 @@ void ImageWidget::mouseMoveEvent(QMouseEvent *event)
         int yPos = m_mouseDstPos.y() - m_mouseSrcPos.y();
         qDebug() << "yPos = " + yPos;
 
+        if(xPos > 0)    //禁止向右滑动
+            xPos = 0;
+        if(yPos > 0)    //禁止向下滑动
+            yPos = 0;
+
+        double w = cenPixW * zoomScale;
+        double h = cenPixH * zoomScale;
+
+        if(xPos < (240 - w))    //向左滑动到达右边界时，禁止继续滑动
+            xPos = 240 - w;
+
+        if(yPos < (320 - h))    //向上滑动到达右边界时，禁止继续滑动
+            yPos = 320 - h;
+
         //边界处理
             //计算当前窗口的中心点在图片中的坐标
 
@@ -128,7 +150,10 @@ void ImageWidget::mouseMoveEvent(QMouseEvent *event)
 
             //对比移动距离和边界距离，移动图片到达边界时,自动切换到下一张图片居中显示.
 
-        m_showWidget->move(xPos, yPos);
+        m_showWidget->move(xPos + xPosLast, yPos + yPosLast);
+        m_showWidget->show();
+//        xPosLast = xPos;
+//        yPosLast = yPos;
     }
 }
 
@@ -140,23 +165,33 @@ void ImageWidget::mouseDoubleClickEvent(QMouseEvent *event)
     isZoomMode = true;
     if(isSingleItemUI){                 //判断当前是否查看图像界面 查看图像界面/缩略图界面
         if(isFirstDouble){              //第一次双击，放大到填充屏幕
-            qDebug() << "first double click!!";
+            //qDebug() << "first double click!!";
             isFirstDouble = false;
-            double scale = getScaleValue(cenPicSize, screenSize);
+            zoomScale = getScaleValue(cenPicSize, screenSize);
 
-            double w = cenPixW * scale;
-            double h = cenPixH * scale;
+            double w = cenPixW * zoomScale;
+            double h = cenPixH * zoomScale;
 
             m_showWidget->close();
             m_showWidget->setPixmap(cenPixmap.scaled(w, h, Qt::KeepAspectRatio));   //按比例缩放到(w, h)大小
             m_showWidget->resize(w, h);
+
+            QPoint clickP = event->pos();
+            //m_showWidget->move(-(clickP.x() * (scale - 1) / 2), - (clickP.y() * (scale - 1) / 2));    //需要以双击位置为中心点放大
+            m_showWidget->move(0, 0);
             m_showWidget->show();
         }else{   //第二次双击，返回slot_itemClicked
-            qDebug() << "second double click!!!";
+            //qDebug() << "second double click!!!";
             isFirstDouble = true;
 
             m_showWidget->resize(showPixmap.size());
             m_showWidget->setPixmap(showPixmap);
+
+            if(curIndex == 0)
+                m_showWidget->move(0, 0);
+            else
+                m_showWidget->move(-240, 0);
+
             m_showWidget->show();
         }
     }

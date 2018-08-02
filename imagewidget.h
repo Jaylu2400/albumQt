@@ -43,6 +43,9 @@ private:
     bool isZoomMode;        //是否缩放模式    default:false
     int cenPixW;
     int cenPixH;
+    double zoomScale;
+    int xPosLast;
+    int yPosLast;
 
     void setLabelMove(bool enable);
     void zoomOut(void);     //缩小图片
