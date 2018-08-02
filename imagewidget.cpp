@@ -29,6 +29,8 @@ ImageWidget::ImageWidget(QWidget *parent)
     , isSingleItemUI(false)
     , isFirstDouble(true)
     , isZoomMode(false)
+    , cenPixW(0)
+    , cenPixH(0)
 {
     this->init();
 
@@ -57,14 +59,14 @@ ImageWidget::~ImageWidget(){
 
 void ImageWidget::mousePressEvent(QMouseEvent *event)
 {
-    qDebug() << "mousePressEvent";
+    //qDebug() << "mousePressEvent";
     mousePress = true;
     m_mouseSrcPos = event->pos();
 }
 
 void ImageWidget::mouseReleaseEvent(QMouseEvent *event)
 {
-    qDebug() << "mouse Relase Event";
+    //qDebug() << "mouse Relase Event";
     if (mouseMove) {
 
             m_mouseDstPos = event->pos();
@@ -119,9 +121,12 @@ void ImageWidget::mouseMoveEvent(QMouseEvent *event)
         int yPos = m_mouseDstPos.y() - m_mouseSrcPos.y();
         qDebug() << "yPos = " + yPos;
 
-        //计算当前窗口的中心点在图片中的坐标
-        //根据坐标可以计算出上下左右4个边界的距离
-        //对比移动距离和边界距离，移动图片到达边界时,自动切换到下一张图片居中显示.
+        //边界处理
+            //计算当前窗口的中心点在图片中的坐标
+
+            //根据坐标可以计算出上下左右4个边界的距离
+
+            //对比移动距离和边界距离，移动图片到达边界时,自动切换到下一张图片居中显示.
 
         m_showWidget->move(xPos, yPos);
     }
@@ -131,18 +136,19 @@ void ImageWidget::mouseDoubleClickEvent(QMouseEvent *event)
 {
     QSize screenSize(240, 320);
 
-    qDebug() << "mouseDoubleClickEvent";
+    //qDebug() << "mouseDoubleClickEvent";
     isZoomMode = true;
-    if(isSingleItemUI){                 //判断当前是否查看图像界面) 查看图像界面/缩略图界面
+    if(isSingleItemUI){                 //判断当前是否查看图像界面 查看图像界面/缩略图界面
         if(isFirstDouble){              //第一次双击，放大到填充屏幕
             qDebug() << "first double click!!";
             isFirstDouble = false;
             double scale = getScaleValue(cenPixmap.size(), screenSize);
-            qDebug() << "scale = " << scale;
 
-            m_showWidget->setPixmap(cenPixmap.scaled(cenPixmap.width() * scale, cenPixmap.height() * scale, Qt::KeepAspectRatio));
-            m_showWidget->resize(cenPixmap.size());
-            m_showWidget->setPixmap(cenPixmap);
+            double w = cenPixW * scale;
+            double h = cenPixH * scale;
+
+            m_showWidget->setPixmap(cenPixmap.scaled(w, h, Qt::KeepAspectRatio));
+            m_showWidget->resize(w, h);
             m_showWidget->show();
         }else{   //第二次双击，返回slot_itemClicked
             qDebug() << "second double click!!!";
@@ -265,6 +271,8 @@ void ImageWidget::updateLoadImg(int index){
 
         int h = pixmap.height();
         int w = pixmap.width();
+        cenPixW = w;
+        cenPixH = h;
 
         painter.drawPixmap((i - xIndex) * 240 + (240 - w) / 2, (320 - h) / 2, pixmap);
 
@@ -301,46 +309,74 @@ void ImageWidget::updateLoadImg(int index){
 
 double ImageWidget::getScaleValue(QSize img, QSize view)
 {
+    double w = view.width() * 1.0;
+    double h = view.height()* 1.0;
+    double wi = img.width();
+    double hi = img.height();
 
-    double scale;
-    double scale1 = view.width() * 0.1  / img.width();
-    double scale2 = view.height() * 0.1 / img.height();
-    double scale3 = view.width() * 0.1  / img.height();
-    double scale4 = view.height() * 0.1 / img.width();
-    double zoomRate;
+    double x = w / wi;
+    double y = h / hi;
 
-    if((img.width() / img.height()) > 2 || (img.width() / img.height() < 0.5)){
-        scale = qMin(scale1, scale2);                                       //1
+    if((wi <= w) && (hi <= h)){
+        if (x >= y)
+            return x;
+        else
+            return y;
+    }else
+        if((wi > w) && (hi <= h)){
+            //get: y > x
+            return y;
+        }else
+            if((wi <= w) && (hi >=h)){
+                //get: x > y
+                return x;
+            }else
+                if((wi >= w) && (hi >= h)){
+                    if(x > y)
+                        return 1/x;
+                    else
+                        return 1/y;
+                }
 
-        zoomRate = qMin(qMax(scale1, scale2), qMax(scale3, scale4)); //2
-        if(zoomRate > SCALE_LIMIT)                                          //3
-            zoomRate = SCALE_LIMIT;
+//    double scale;
+//    double scale1 = view.width() * 0.1  / img.width();
+//    double scale2 = view.height() * 0.1 / img.height();
+//    double scale3 = view.width() * 0.1  / img.height();
+//    double scale4 = view.height() * 0.1 / img.width();
+//    double zoomRate;
 
-        while(scale >= zoomRate){                                           //4
-            zoomRate = qMax(qMax(scale1, scale2), qMax(scale3, scale4));
-        }
-        if(zoomRate > SCALE_LIMIT)                                          //5
-            zoomRate = SCALE_LIMIT;
-        return zoomRate;                                                    //6
-    }else{
-        scale = qMin(scale1, scale2);
-        double largerInitRate = qMax(qMin(scale1, scale2), qMin(scale3, scale4));
-        if(largerInitRate > SCALE_LIMIT)
-            largerInitRate = SCALE_LIMIT;
+//    if((img.width() / img.height()) > 2 || (img.width() / img.height() < 0.5)){
+//        scale = qMin(scale1, scale2);                                       //1
 
-        zoomRate = qMin(scale2, largerInitRate * 2.0f);
-        if(zoomRate > SCALE_LIMIT)
-            zoomRate = SCALE_LIMIT;
+//        zoomRate = qMin(qMax(scale1, scale2), qMax(scale3, scale4)); //2
+//        if(zoomRate > SCALE_LIMIT)                                          //3
+//            zoomRate = SCALE_LIMIT;
 
-        while(scale >= zoomRate){
-            zoomRate = largerInitRate * 2.0f;
-        }
+//        while(scale >= zoomRate){                                           //4
+//            zoomRate = qMax(qMax(scale1, scale2), qMax(scale3, scale4));
+//        }
+//        if(zoomRate > SCALE_LIMIT)                                          //5
+//            zoomRate = SCALE_LIMIT;
+//        return zoomRate;                                                    //6
+//    }else{
+//        scale = qMin(scale1, scale2);
+//        double largerInitRate = qMax(qMin(scale1, scale2), qMin(scale3, scale4));
+//        if(largerInitRate > SCALE_LIMIT)
+//            largerInitRate = SCALE_LIMIT;
 
-        if(zoomRate > SCALE_LIMIT)
-            zoomRate = SCALE_LIMIT;
+//        zoomRate = qMin(scale2, largerInitRate * 2.0f);
+//        if(zoomRate > SCALE_LIMIT)
+//            zoomRate = SCALE_LIMIT;
 
-        return zoomRate;
-    }
+//        while(scale >= zoomRate){
+//            zoomRate = largerInitRate * 2.0f;
+//        }
+
+//        if(zoomRate > SCALE_LIMIT)
+//            zoomRate = SCALE_LIMIT;
+
+//        return zoomRate;
+//    }
 }
 
 // 全屏等比例显示图像

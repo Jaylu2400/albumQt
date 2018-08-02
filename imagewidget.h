@@ -41,6 +41,8 @@ private:
     bool isSingleItemUI;    //是否图片查看界面 default:false
     bool isFirstDouble;     //是否第一次双击   default:true
     bool isZoomMode;        //是否缩放模式    default:false
+    int cenPixW;
+    int cenPixH;
 
     void setLabelMove(bool enable);
     void zoomOut(void);     //缩小图片
