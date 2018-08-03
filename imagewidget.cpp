@@ -49,7 +49,7 @@ ImageWidget::ImageWidget(QWidget *parent)
 }
 
 void ImageWidget::initObject(){
-    qDebug() << "initObject()";
+    //qDebug() << "initObject()";
 
     m_showWidget = new QLabel(this);
     menuButton = new QPushButton(this);
@@ -76,8 +76,6 @@ void ImageWidget::mouseReleaseEvent(QMouseEvent *event)
 
     if(!isZoomMode){
         if (mouseMove) {
-
-
                 if((curIndex == 0) && (xPos > 0)){
                     return;
                 }else
@@ -98,7 +96,29 @@ void ImageWidget::mouseReleaseEvent(QMouseEvent *event)
                 updateLoadImg(curIndex);
          }
     }else{
-        //m_showWidget->setGeometry(xPos, yPos, cenPixW * zoomScale - xPos, cenPixH * zoomScale - yPos);
+        if(xPos > 0)    //禁止向右滑动
+            xPos = 0;
+        if(yPos > 0)    //禁止向下滑动
+            yPos = 0;
+
+        double w = cenPixW * zoomScale;
+        double h = cenPixH * zoomScale;
+
+        if(xPos < (240 - w))    //向左滑动到达右边界时，禁止继续滑动
+            xPos = 240 - w;
+
+        if(yPos < (320 - h))    //向上滑动到达右边界时，禁止继续滑动
+            yPos = 320 - h;
+
+        //边界处理
+            //计算当前窗口的中心点在图片中的坐标
+
+            //根据坐标可以计算出上下左右4个边界的距离
+
+            //对比移动距离和边界距离，移动图片到达边界时,自动切换到下一张图片居中显示.
+
+        m_showWidget->move(xPos + xPosLast, yPos + yPosLast);
+        m_showWidget->show();
     }
 }
 
@@ -200,8 +220,7 @@ void ImageWidget::mouseDoubleClickEvent(QMouseEvent *event)
 }
 
 void ImageWidget::gestureEvent(QGestureEvent *event){
-    qDebug() << "gestureEvent";
-    printf("gestureEvent\n");
+    //qDebug() << "gestureEvent";
 }
 
 void ImageWidget::setLabelMove(bool enable)
@@ -221,7 +240,7 @@ void ImageWidget::zoomIn()
 
 void ImageWidget::init() {
 
-    qDebug() << "init()";
+    //qDebug() << "init()";
     const QSize IMAGE_SIZE(78, 78);
     const QSize ITEM_SIZE(78, 78);
 
