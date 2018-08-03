@@ -7,7 +7,7 @@
 #include <QListWidgetItem>
 #include <QPushButton>
 #include <stdbool.h>
-#include <qDebug>
+#include <//qDebug>
 #include <QMouseEvent>
 #include <QScrollBar>
 #include <QPainter>
@@ -49,8 +49,6 @@ ImageWidget::ImageWidget(QWidget *parent)
 }
 
 void ImageWidget::initObject(){
-    //qDebug() << "initObject()";
-
     m_showWidget = new QLabel(this);
     menuButton = new QPushButton(this);
     backButton   = new QPushButton(this);
@@ -62,74 +60,69 @@ ImageWidget::~ImageWidget(){
 
 void ImageWidget::mousePressEvent(QMouseEvent *event)
 {
-    //qDebug() << "mousePressEvent";
     mousePress = true;
     m_mouseSrcPos = event->pos();
+
+    xPosLast = m_showWidget->x();
+    yPosLast = m_showWidget->y();
+
+    printf("Press isZoomMode, isFirstDouble, xPos = %d, yPos = %d, xPosLast = m_showWidget.x = %d, yPosLast = m_showWidget.y = %d\n",\
+                                       m_mouseSrcPos.x(),    m_mouseSrcPos.y(),   m_showWidget->x(),  m_showWidget->y());
 }
 
 void ImageWidget::mouseReleaseEvent(QMouseEvent *event)
 {
-    //qDebug() << "mouse Relase Event";
     m_mouseDstPos = event->pos();
     int xPos = m_mouseDstPos.x() - m_mouseSrcPos.x();
     int yPos = m_mouseDstPos.y() - m_mouseSrcPos.y();
 
     if(!isZoomMode){
         if (mouseMove) {
-                if((curIndex == 0) && (xPos > 0)){
-                    return;
-                }else
-                if((curIndex == m_listWidget->count() - 1) && (xPos < 0)){
-                    return;
-                }
+            if((curIndex == 0) && (xPos > 0)){
+                return;
+            }else
+            if((curIndex == m_listWidget->count() - 1) && (xPos < 0)){
+                return;
+            }
 
-                if (xPos > 100) {                     //move right
-                     curIndex --;
-                     curPosX = -240;
-                }else
-                if(xPos < -100){
-                     curIndex ++;
-                     curPosX = 240;
-                }
+            if (xPos > 100) {                     //move right
+                 curIndex --;
+                 curPosX = -240;
+            }else
+            if(xPos < -100){
+                 curIndex ++;
+                 curPosX = 240;
+            }
 
-                m_showWidget->move(curPosX, 0);
-                updateLoadImg(curIndex);
+            m_showWidget->move(curPosX, 0);
+            updateLoadImg(curIndex);
          }
     }else{
-        if(xPos > 0)    //禁止向右滑动
-            xPos = 0;
-        if(yPos > 0)    //禁止向下滑动
-            yPos = 0;
+        if(isZoomMode){
+            if(isFirstDouble){
+                m_showWidget->resize(showPixmap.size());
+                m_showWidget->setPixmap(showPixmap);
 
-        double w = cenPixW * zoomScale;
-        double h = cenPixH * zoomScale;
+                if(curIndex == 0)
+                    m_showWidget->move(0, 0);
+                else
+                    m_showWidget->move(-240, 0);
 
-        if(xPos < (240 - w))    //向左滑动到达右边界时，禁止继续滑动
-            xPos = 240 - w;
+                m_showWidget->show();
 
-        if(yPos < (320 - h))    //向上滑动到达右边界时，禁止继续滑动
-            yPos = 320 - h;
-
-        //边界处理
-            //计算当前窗口的中心点在图片中的坐标
-
-            //根据坐标可以计算出上下左右4个边界的距离
-
-            //对比移动距离和边界距离，移动图片到达边界时,自动切换到下一张图片居中显示.
-
-        m_showWidget->move(xPos + xPosLast, yPos + yPosLast);
-        m_showWidget->show();
+                printf("Release isZoomMode, isFirstDouble, xPos = %d, yPos = %d, m_showWidget.x = %d, .y = %d\n",\
+                                                   xPos,    yPos,   m_showWidget->x(),  m_showWidget->y());
+            }
+        }
     }
 }
 
 void ImageWidget::mouseMoveEvent(QMouseEvent *event)
 {
-    //qDebug() << "mouse Move Event";
     mouseMove = true;
     m_mouseDstPos = event->pos();
 
     int xPos = m_mouseDstPos.x() - m_mouseSrcPos.x();
-    qDebug() << "xPos = " + xPos;
 
     if(!isZoomMode){
         if((curIndex == 0) && (xPos > 0)){
@@ -147,21 +140,41 @@ void ImageWidget::mouseMoveEvent(QMouseEvent *event)
             m_showWidget->move(xPos - 240, 0);
     }else{
         int yPos = m_mouseDstPos.y() - m_mouseSrcPos.y();
-        qDebug() << "yPos = " + yPos;
-
-        if(xPos > 0)    //禁止向右滑动
-            xPos = 0;
-        if(yPos > 0)    //禁止向下滑动
-            yPos = 0;
 
         double w = cenPixW * zoomScale;
         double h = cenPixH * zoomScale;
 
-        if(xPos < (240 - w))    //向左滑动到达右边界时，禁止继续滑动
-            xPos = 240 - w;
+        if(xPos < 0){    //to left
+            if(xPos < (240 - w))    //单次向左滑动到达右边界时，禁止继续滑动
+                xPos = 240 - w;
 
-        if(yPos < (320 - h))    //向上滑动到达右边界时，禁止继续滑动
-            yPos = 320 - h;
+            if(m_showWidget->x() < (240 - w)){    //向左滑动到达图像右边界时，停止滑动
+                    xPosLast = 0;
+                    return;
+            }
+        }else
+            if(xPos > 0){//to right
+                if(m_showWidget->x() >= 0){ //向右滑动，图片到达左边界，禁止继续滑动
+                    xPosLast = 0;
+                    xPos = 0;
+                }
+            }
+
+        if(yPos < 0){   //to up
+            if(yPos < (320 - h))    //向上滑动到达右边界时，禁止继续滑动
+                yPos = 320 - h;
+
+            if(m_showWidget->y() < (320 - h)){    //向左滑动到达图像右边界时，停止滑动
+                    yPosLast = 0;
+                    return;
+            }
+        }else
+            if(yPos > 0){//to down
+                if(m_showWidget->y() >= 0){    //向下滑动，图片到达上边界，禁止继续滑动
+                    yPosLast = 0;
+                    yPos = 0;
+                }
+            }
 
         //边界处理
             //计算当前窗口的中心点在图片中的坐标
@@ -172,8 +185,9 @@ void ImageWidget::mouseMoveEvent(QMouseEvent *event)
 
         m_showWidget->move(xPos + xPosLast, yPos + yPosLast);
         m_showWidget->show();
-//        xPosLast = xPos;
-//        yPosLast = yPos;
+
+        printf("Move isZoomMode, isFirstDouble, xPos = %d, yPos = %d, m_showWidget.x = %d, .y = %d, xPosLast = %d, yPosLast = %d\n",\
+                                           xPos,    yPos,   m_showWidget->x(),  m_showWidget->y(), xPosLast, yPosLast);
     }
 }
 
@@ -181,12 +195,16 @@ void ImageWidget::mouseDoubleClickEvent(QMouseEvent *event)
 {
     QSize screenSize(240, 320);
     QSize cenPicSize(cenPixW, cenPixH);
-    //qDebug() << "mouseDoubleClickEvent";
-    isZoomMode = true;
+
     if(isSingleItemUI){                 //判断当前是否查看图像界面 查看图像界面/缩略图界面
         if(isFirstDouble){              //第一次双击，放大到填充屏幕
-            //qDebug() << "first double click!!";
+            ////qDebug() << "first double click!!";
+            isZoomMode = true;
             isFirstDouble = false;
+
+            xPosLast = 0;
+            yPosLast = 0;
+
             zoomScale = getScaleValue(cenPicSize, screenSize);
 
             double w = cenPixW * zoomScale;
@@ -200,19 +218,12 @@ void ImageWidget::mouseDoubleClickEvent(QMouseEvent *event)
             //m_showWidget->move(-(clickP.x() * (scale - 1) / 2), - (clickP.y() * (scale - 1) / 2));    //需要以双击位置为中心点放大
             m_showWidget->move(0, 0);
             m_showWidget->show();
+
+            return;
         }else{   //第二次双击，返回slot_itemClicked
-            //qDebug() << "second double click!!!";
+            ////qDebug() << "second double click!!!";
             isFirstDouble = true;
-
-            m_showWidget->resize(showPixmap.size());
-            m_showWidget->setPixmap(showPixmap);
-
-            if(curIndex == 0)
-                m_showWidget->move(0, 0);
-            else
-                m_showWidget->move(-240, 0);
-
-            m_showWidget->show();
+            isZoomMode = false;
         }
     }
     else
@@ -220,8 +231,13 @@ void ImageWidget::mouseDoubleClickEvent(QMouseEvent *event)
 }
 
 void ImageWidget::gestureEvent(QGestureEvent *event){
-    //qDebug() << "gestureEvent";
+    ////qDebug() << "gestureEvent";
 }
+
+
+//gesturestart    // 当有两根或多根手指放到屏幕上的时候触发
+//gesturechange    // 当有两根或多根手指在屏幕上，并且有手指移动的时候触发
+//gestureend    // 当倒数第二根手指提起的时候触发，结束gesture
 
 void ImageWidget::setLabelMove(bool enable)
 {
@@ -240,7 +256,7 @@ void ImageWidget::zoomIn()
 
 void ImageWidget::init() {
 
-    //qDebug() << "init()";
+    ////qDebug() << "init()";
     const QSize IMAGE_SIZE(78, 78);
     const QSize ITEM_SIZE(78, 78);
 
@@ -316,11 +332,12 @@ void ImageWidget::updateLoadImg(int index){
     QPainter painter(&pixmap);
     QImage image;
 
-    qDebug() << "l = " << l << " r = " << r << " xIndex = " << xIndex;
+    pixmap.fill(Qt::transparent);
+    //qDebug() << "l = " << l << " r = " << r << " xIndex = " << xIndex;
 
     //如果点击第一张图片，自动加载下一张，禁止右滑|如果点击最后一张，自动加载上一张，禁止左滑
     for(int i = l; i <= r; i++){
-        qDebug() << m_strPath + "/" + m_imgList.at(i);
+        //qDebug() << m_strPath + "/" + m_imgList.at(i);
         QImage image(m_strPath + "/" + m_imgList.at(i));
         QPixmap pixmap = QPixmap::fromImage(image).scaled(picSize, Qt::KeepAspectRatio);
 
@@ -346,14 +363,14 @@ void ImageWidget::updateLoadImg(int index){
     QPixmap pixmap(QSize(this->width() * (r - l + 1), this->height()));
     QPainter painter(&pixmap);
 
-    qDebug() << "l = " << l << " r = " << r << " xIndex = " << xIndex;
+    //qDebug() << "l = " << l << " r = " << r << " xIndex = " << xIndex;
 
     //如果点击第一张图片，自动加载下一张，禁止右滑|如果点击最后一张，自动加载上一张，禁止左滑
     for(int i = l; i <= r; i++){
         int h = QPixmap(m_strPath + "//" + m_imgList.at(i)).scaled(picSize, Qt::KeepAspectRatio).height();
         int w = QPixmap(m_strPath + "//" + m_imgList.at(i)).scaled(picSize, Qt::KeepAspectRatio).width();
 
-        qDebug() << "w = " << w << " h = " << h;
+        //qDebug() << "w = " << w << " h = " << h;
         painter.drawPixmap((i - xIndex) * 240, (320 - h) / 2, QPixmap(m_strPath + "//" + m_imgList.at(i)).scaled(picSize, Qt::KeepAspectRatio));
     }
     m_showWidget->resize(pixmap.size());
@@ -437,7 +454,7 @@ double ImageWidget::getScaleValue(QSize img, QSize view)
 
 // 全屏等比例显示图像
 void ImageWidget::slot_itemClicked(QListWidgetItem * item){
-    qDebug() << "slot_itemClicked, item index= " << m_listWidget->row(item) << "count = " << m_listWidget->count();
+    //qDebug() << "slot_itemClicked, item index= " << m_listWidget->row(item) << "count = " << m_listWidget->count();
     isSingleItemUI = true;
 
     curIndex = m_listWidget->row(item);
@@ -459,11 +476,11 @@ void ImageWidget::slot_itemClicked(QListWidgetItem * item){
 }
 
 void ImageWidget::menuView(void){
-    qDebug() << "menuView";
+    //qDebug() << "menuView";
 }
 
 void ImageWidget::back2Album(void){
-    qDebug() << "back2Album";
+    //qDebug() << "back2Album";
     isSingleItemUI = false;
     isZoomMode = false;
 //    delete m_showWidget;
@@ -475,11 +492,11 @@ void ImageWidget::back2Album(void){
 //    backButton      =   NULL;
 
 //    if(NULL != m_showWidget)
-//        qDebug() << "delete m_showWidget fail!!!";
+//        //qDebug() << "delete m_showWidget fail!!!";
 //    if(NULL != menuButton)
-//        qDebug() << "delete menuButton fail!";
+//        //qDebug() << "delete menuButton fail!";
 //    if(NULL != backButton)
-//        qDebug() << "delete backButton fail!";
+//        //qDebug() << "delete backButton fail!";
     disconnect(backButton, SIGNAL(clicked()), this, SLOT(back2Album()));
     m_showWidget->hide();
     this->show();

@@ -31,3 +31,5 @@ SOURCES += \
 HEADERS += \
         mainwindow.h \
     imagewidget.h
+
+CONFIG += console
