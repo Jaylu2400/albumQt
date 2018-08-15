@@ -357,7 +357,10 @@ void ImageWidget::updateLoadImg(int index){
     m_showWidget->resize(showPixmap.size());
     m_showWidget->setPixmap(showPixmap);
     //加载2或3张图片后，总是从第0张开始显示，所以除了点击第一张图片，其它都要左移一个窗口宽度
-    m_showWidget->move((l - r + 1) * 240, 0);
+    if(index == r)
+        m_showWidget->move((l - r) * 240, 0);
+    else
+        m_showWidget->move((l - r + 1) * 240, 0);
 #endif
 #ifdef Win32
     QPixmap pixmap(QSize(this->width() * (r - l + 1), this->height()));
@@ -410,46 +413,6 @@ double ImageWidget::getScaleValue(QSize img, QSize view)
                     else
                         return 1/y;
                 }
-
-//    double scale;
-//    double scale1 = view.width() * 0.1  / img.width();
-//    double scale2 = view.height() * 0.1 / img.height();
-//    double scale3 = view.width() * 0.1  / img.height();
-//    double scale4 = view.height() * 0.1 / img.width();
-//    double zoomRate;
-
-//    if((img.width() / img.height()) > 2 || (img.width() / img.height() < 0.5)){
-//        scale = qMin(scale1, scale2);                                       //1
-
-//        zoomRate = qMin(qMax(scale1, scale2), qMax(scale3, scale4)); //2
-//        if(zoomRate > SCALE_LIMIT)                                          //3
-//            zoomRate = SCALE_LIMIT;
-
-//        while(scale >= zoomRate){                                           //4
-//            zoomRate = qMax(qMax(scale1, scale2), qMax(scale3, scale4));
-//        }
-//        if(zoomRate > SCALE_LIMIT)                                          //5
-//            zoomRate = SCALE_LIMIT;
-//        return zoomRate;                                                    //6
-//    }else{
-//        scale = qMin(scale1, scale2);
-//        double largerInitRate = qMax(qMin(scale1, scale2), qMin(scale3, scale4));
-//        if(largerInitRate > SCALE_LIMIT)
-//            largerInitRate = SCALE_LIMIT;
-
-//        zoomRate = qMin(scale2, largerInitRate * 2.0f);
-//        if(zoomRate > SCALE_LIMIT)
-//            zoomRate = SCALE_LIMIT;
-
-//        while(scale >= zoomRate){
-//            zoomRate = largerInitRate * 2.0f;
-//        }
-
-//        if(zoomRate > SCALE_LIMIT)
-//            zoomRate = SCALE_LIMIT;
-
-//        return zoomRate;
-//    }
 }
 
 // 全屏等比例显示图像
