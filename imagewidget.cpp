@@ -7,7 +7,7 @@
 #include <QListWidgetItem>
 #include <QPushButton>
 #include <stdbool.h>
-#include <//qDebug>
+#include <qDebug>
 #include <QMouseEvent>
 #include <QScrollBar>
 #include <QPainter>
@@ -15,10 +15,6 @@
 #include <QGesture>
 #include <QGestureEvent>
 #include <QtMath>
-//refer:
-//https://blog.csdn.net/taiyang1987912/article/details/45567699#
-
-#define SCALE_LIMIT 4
 
 ImageWidget::ImageWidget(QWidget *parent)
     : QWidget(parent)
@@ -176,13 +172,6 @@ void ImageWidget::mouseMoveEvent(QMouseEvent *event)
                 }
             }
 
-        //边界处理
-            //计算当前窗口的中心点在图片中的坐标
-
-            //根据坐标可以计算出上下左右4个边界的距离
-
-            //对比移动距离和边界距离，移动图片到达边界时,自动切换到下一张图片居中显示.
-
         m_showWidget->move(xPos + xPosLast, yPos + yPosLast);
         m_showWidget->show();
 
@@ -235,9 +224,9 @@ void ImageWidget::gestureEvent(QGestureEvent *event){
 }
 
 
-//gesturestart    // 当有两根或多根手指放到屏幕上的时候触发
-//gesturechange    // 当有两根或多根手指在屏幕上，并且有手指移动的时候触发
-//gestureend    // 当倒数第二根手指提起的时候触发，结束gesture
+//gesturestart      // 当有两根或多根手指放到屏幕上的时候触发
+//gesturechange     // 当有两根或多根手指在屏幕上，并且有手指移动的时候触发
+//gestureend        // 当倒数第二根手指提起的时候触发，结束gesture
 
 void ImageWidget::setLabelMove(bool enable)
 {
@@ -332,7 +321,7 @@ void ImageWidget::updateLoadImg(int index){
     QPainter painter(&pixmap);
     QImage image;
 
-    pixmap.fill(Qt::transparent);
+    pixmap.fill(Qt::black);
     //qDebug() << "l = " << l << " r = " << r << " xIndex = " << xIndex;
 
     //如果点击第一张图片，自动加载下一张，禁止右滑|如果点击最后一张，自动加载上一张，禁止左滑
@@ -446,20 +435,7 @@ void ImageWidget::back2Album(void){
     //qDebug() << "back2Album";
     isSingleItemUI = false;
     isZoomMode = false;
-//    delete m_showWidget;
-//    delete menuButton;
-//    delete backButton;
 
-//    m_showWidget    =   NULL;
-//    menuButton      =   NULL;
-//    backButton      =   NULL;
-
-//    if(NULL != m_showWidget)
-//        //qDebug() << "delete m_showWidget fail!!!";
-//    if(NULL != menuButton)
-//        //qDebug() << "delete menuButton fail!";
-//    if(NULL != backButton)
-//        //qDebug() << "delete backButton fail!";
     disconnect(backButton, SIGNAL(clicked()), this, SLOT(back2Album()));
     m_showWidget->hide();
     this->show();
