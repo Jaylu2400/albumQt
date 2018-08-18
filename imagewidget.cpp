@@ -354,21 +354,37 @@ void ImageWidget::updateLoadImg(int index){
 #ifdef Win32
     QPixmap pixmap(QSize(this->width() * (r - l + 1), this->height()));
     QPainter painter(&pixmap);
+    QImage image;
 
+    pixmap.fill(Qt::black);
     //qDebug() << "l = " << l << " r = " << r << " xIndex = " << xIndex;
 
     //如果点击第一张图片，自动加载下一张，禁止右滑|如果点击最后一张，自动加载上一张，禁止左滑
     for(int i = l; i <= r; i++){
-        int h = QPixmap(m_strPath + "//" + m_imgList.at(i)).scaled(picSize, Qt::KeepAspectRatio).height();
-        int w = QPixmap(m_strPath + "//" + m_imgList.at(i)).scaled(picSize, Qt::KeepAspectRatio).width();
+        //qDebug() << m_strPath + "/" + m_imgList.at(i);
+        QImage image(m_strPath + "//" + m_imgList.at(i));
+        QPixmap pixmap = QPixmap::fromImage(image).scaled(picSize, Qt::KeepAspectRatio);
 
-        //qDebug() << "w = " << w << " h = " << h;
-        painter.drawPixmap((i - xIndex) * 240, (320 - h) / 2, QPixmap(m_strPath + "//" + m_imgList.at(i)).scaled(picSize, Qt::KeepAspectRatio));
+        int h = pixmap.height();
+        int w = pixmap.width();
+
+        painter.drawPixmap((i - xIndex) * 240 + (240 - w) / 2, (320 - h) / 2, pixmap);
+
+        if(index == i){
+            cenPixW = w;
+            cenPixH = h;
+            cenPixmap = cenPixmap.fromImage(image); //KeepAspectRatio  KeepAspectRatioByExpanding , Qt::SmoothTransformation
+        }
     }
-    m_showWidget->resize(pixmap.size());
-    //m_showWidget->setAlignment(Qt::AlignVCenter);
-    m_showWidget->setPixmap(pixmap);
-    m_showWidget->move((l - r + 1) * 240, 0);        //居中显示
+    showPixmap = pixmap;
+
+    m_showWidget->resize(showPixmap.size());
+    m_showWidget->setPixmap(showPixmap);
+    //加载2或3张图片后，总是从第0张开始显示，所以除了点击第一张图片，其它都要左移一个窗口宽度
+    if(index == r)
+        m_showWidget->move((l - r) * 240, 0);
+    else
+        m_showWidget->move((l - r + 1) * 240, 0);
 #endif
 }
 
