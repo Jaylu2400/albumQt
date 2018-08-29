@@ -20,7 +20,6 @@ class ImageWidget : public QWidget
 public:
     ImageWidget(QWidget *parent = 0);
     ~ImageWidget();
-    friend class picListShow;
 
 protected:
     void mousePressEvent(QMouseEvent *event);
@@ -28,6 +27,8 @@ protected:
     void mouseMoveEvent(QMouseEvent *event);
     void mouseDoubleClickEvent(QMouseEvent *event);
     void gestureEvent(QGestureEvent *event);
+    //bool event(QEvent *event);
+    void touchEvent(QEvent *event);
 private:
     QPoint m_mouseSrcPos;   //滑动的初始点
     QPoint m_mouseDstPos;   //滑动的终点

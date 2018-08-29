@@ -97,8 +97,8 @@ void ImageWidget::mousePressEvent(QMouseEvent *event)
     xPosLast = mShowWidget->x();
     yPosLast = mShowWidget->y();
 
-    printf("Press isZoomMode, isFirstDouble, xPos = %d, yPos = %d, xPosLast = mShowWidget.x = %d, yPosLast = mShowWidget.y = %d\n",\
-                                       m_mouseSrcPos.x(),    m_mouseSrcPos.y(),   mShowWidget->x(),  mShowWidget->y());
+//    printf("Press isZoomMode, isFirstDouble, xPos = %d, yPos = %d, xPosLast = mShowWidget.x = %d, yPosLast = mShowWidget.y = %d\n",\
+//                                       m_mouseSrcPos.x(),    m_mouseSrcPos.y(),   mShowWidget->x(),  mShowWidget->y());
 }
 
 void ImageWidget::mouseReleaseEvent(QMouseEvent *event)
@@ -141,8 +141,8 @@ void ImageWidget::mouseReleaseEvent(QMouseEvent *event)
 
                 mShowWidget->show();
 
-                printf("Release isZoomMode, isFirstDouble, xPos = %d, yPos = %d, mShowWidget.x = %d, .y = %d\n",\
-                                                   xPos,    yPos,   mShowWidget->x(),  mShowWidget->y());
+//                printf("Release isZoomMode, isFirstDouble, xPos = %d, yPos = %d, mShowWidget.x = %d, .y = %d\n",\
+//                                                   xPos,    yPos,   mShowWidget->x(),  mShowWidget->y());
             }
         }
     }
@@ -210,8 +210,8 @@ void ImageWidget::mouseMoveEvent(QMouseEvent *event)
         mShowWidget->move(xPos + xPosLast, yPos + yPosLast);
         mShowWidget->show();
 
-        printf("Move isZoomMode, isFirstDouble, xPos = %d, yPos = %d, mShowWidget.x = %d, .y = %d, xPosLast = %d, yPosLast = %d\n",\
-                                           xPos,    yPos,   mShowWidget->x(),  mShowWidget->y(), xPosLast, yPosLast);
+//        printf("Move isZoomMode, isFirstDouble, xPos = %d, yPos = %d, mShowWidget.x = %d, .y = %d, xPosLast = %d, yPosLast = %d\n",\
+//                                           xPos,    yPos,   mShowWidget->x(),  mShowWidget->y(), xPosLast, yPosLast);
     }
 }
 
@@ -255,8 +255,67 @@ void ImageWidget::mouseDoubleClickEvent(QMouseEvent *event)
 }
 
 void ImageWidget::gestureEvent(QGestureEvent *event){
-    qDebug() << "gestureEvent";
+    printf("gestureEvent\n");
 }
+
+void ImageWidget::touchEvent(QEvent *event)
+{
+    switch (event->type())
+      {
+        case QEvent::TouchBegin:
+            //ui->FFLabel[1]->setText("Event began.");
+            break;
+        case QEvent::TouchEnd:
+            //ui->FFLabel[1]->setText("Event ended.");
+            break;
+        case QEvent::TouchUpdate:
+        {
+            //ui->FFLabel[1]->setText("Event updated.");
+            break;
+        }
+      }
+}
+
+//bool ImageWidget::event(QEvent *event)
+//{
+//    switch (event->type()) {
+//    case QEvent::TouchBegin:
+//    {
+//        QTouchEvent *touchEvent = static_cast<QTouchEvent *>(event);
+//        QList<QTouchEvent::TouchPoint> touchPoints = touchEvent->touchPoints();
+//        if(touchPoints.count() == 2){
+//            printf("TouchBegin   OOOOOOOOOOOOOOO");
+//        }
+//        return true;
+//    }
+//    case QEvent::TouchUpdate:
+//    {
+//        QTouchEvent *touchEvent = static_cast<QTouchEvent *>(event);
+//        QList<QTouchEvent::TouchPoint> touchPoints = touchEvent->touchPoints();
+//        if(touchPoints.count() == 2){
+//            printf("TouchUpdate   KKKKKKKKKKKKKKK");
+//        }
+//        return true;
+//    }
+//    case QEvent::TouchEnd:
+//    {
+//        qDebug() <<"CProjectionPicture::event";
+//        QTouchEvent *touchEvent = static_cast<QTouchEvent *>(event);
+//        QList<QTouchEvent::TouchPoint> touchPoints = touchEvent->touchPoints();
+//        if(touchPoints.count() == 2){
+//            printf("TouchEnd   KKKKKKKKKKKKKKK");
+//        }
+//        else if(touchPoints.count() == 1){
+//            //m_bIsTwoPoint = false;
+//        }
+//        return true;
+//    }
+//    default:
+//        break;
+//    }
+
+//    return QWidget::event(event);
+//}
 
 
 //gesturestart      // 当有两根或多根手指放到屏幕上的时候触发
@@ -448,35 +507,3 @@ void picListShow::mouseReleaseEvent(QMouseEvent *event)
 
     QListWidget::mouseReleaseEvent(event);
 }
-
-//labelShow::labelShow(QWidget *parent)
-//{
-//    this->setParent(parent);
-//}
-
-//labelShow::~labelShow()
-//{
-
-//}
-
-//void labelShow::mouseMoveEvent(QMouseEvent *event)
-//{
-//    slidePoint = event->pos();
-//    yPos1 = slidePoint.y();
-//    xPos1 = slidePoint.x();
-//    int dist = yPos1 - yPos0;
-//    printf("dist = %d\t yPos1 = %d\t yPos0 = %d\txPos1 = %d\n", dist, yPos1, yPos0, xPos1);
-//    this->move(0, dist);
-//    this->show();
-//}
-
-//void labelShow::mousePressEvent(QMouseEvent *event)
-//{
-//    slidePoint = event->pos();
-//    yPos0 = slidePoint.x();
-//}
-
-//void labelShow::mouseReleaseEvent(QMouseEvent *event)
-//{
-
-//}
