@@ -4,8 +4,8 @@
 #include <QMainWindow>
 
 //#define Win32
-#define OSX
-
+//#define OSX
+#define Ubuntu
 namespace Ui {
 class MainWindow;
 }
